@@ -70,6 +70,10 @@ public class Skills {
                                 witherSkill((Player) attacked);
                             }
                             break;
+                        case "shield":
+                            if (doSkill(c)) {
+                                shieldSkill(damager, (Player) attacked);
+                            }
                     }
                 }
             }
@@ -129,6 +133,19 @@ public class Skills {
                         armorContents[slot].getType() == Material.NETHERITE_CHESTPLATE || armorContents[slot].getType() == Material.NETHERITE_HELMET) {
                     damager.setLastDamage(0);
                 }
+            }
+        }
+    }
+
+    private void shieldSkill(Player damager, Player attacked) {
+        if (damager.getLastDamage() > 0) {
+            Material itemInMainHand = attacked.getInventory().getItemInMainHand().getType();
+            Material itemInOffHand = attacked.getInventory().getItemInOffHand().getType();
+            ItemStack air = new ItemStack(Material.AIR, 1);
+            if (itemInMainHand == Material.SHIELD) {
+                attacked.getInventory().setItemInMainHand(air);
+            } else if (itemInOffHand == Material.SHIELD) {
+                attacked.getInventory().setItemInOffHand(air);
             }
         }
     }

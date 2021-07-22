@@ -6,7 +6,7 @@
 
     <groupId>ru.siaw.personal.rpgitems</groupId>
     <artifactId>RPGitems</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
     <packaging>jar</packaging>
 
     <name>Rpgitems</name>

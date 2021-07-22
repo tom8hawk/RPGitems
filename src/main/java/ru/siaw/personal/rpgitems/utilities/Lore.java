@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 public class Lore {
-    private final String[] skill = {"arson", "bleeding", "hit", "lightning", "poisoning", "vampirism", "wither", "input"};
+    private final String[] skill = {"arson", "bleeding", "hit", "lightning", "poisoning", "vampirism", "wither", "input", "shield"};
     private final Messages message = new Messages();
 
     public Collection<? extends String> getSkills() {
