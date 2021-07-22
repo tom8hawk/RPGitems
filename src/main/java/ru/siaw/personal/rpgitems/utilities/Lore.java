@@ -12,6 +12,7 @@ import java.util.Collection;
 
 public class Lore {
     private final String[] skill = {"arson", "bleeding", "hit", "lightning", "poisoning", "vampirism", "wither", "input"};
+    private final Messages message = new Messages();
 
     public Collection<? extends String> getSkills() {
         return Arrays.asList(skill);
@@ -20,18 +21,23 @@ public class Lore {
     public void addLore(Player sender, String addSkill, String chance) {
         ItemStack stack = sender.getInventory().getItemInMainHand();
         ItemMeta meta = stack.getItemMeta();
-        if (meta != null && !stack.getType().isAir()) {
-            ArrayList<String> lore = new ArrayList<>();
-            if (meta.hasLore()) {
-                lore.addAll(meta.getLore());
-            }
-            for (String s : skill) {
-                if (addSkill.contains(s)) {
-                    lore.add(s.charAt(0) + chance);
+        if (!stack.getType().isAir()) {
+            if (meta != null) {
+                ArrayList<String> lore = new ArrayList<>();
+                if (meta.hasLore()) {
+                    lore.addAll(meta.getLore());
                 }
+                for (String s : skill) {
+                    if (addSkill.contains(s)) {
+                        lore.add(s.charAt(0) + chance);
+                    }
+                }
+                meta.setLore(lore);
+                stack.setItemMeta(meta);
+                message.msg(sender, "add");
             }
-            meta.setLore(lore);
-            stack.setItemMeta(meta);
+        } else {
+            message.msg(sender, "air");
         }
     }
 
@@ -62,20 +68,25 @@ public class Lore {
         ItemStack stack = sender.getInventory().getItemInMainHand();
         ItemMeta meta = stack.getItemMeta();
         ArrayList<String> lore = new ArrayList<>();
-        if (stack.getType().isAir() && meta != null) {
-            if (meta.hasLore()) {
-                lore.addAll(meta.getLore());
-            }
-            for (String s : skill) {
-                for (byte chance = 100; chance > -1; chance--) {
-                    String toRemove = s.charAt(0) + Byte.toString(chance);
-                    if (removeSkill.contains(String.valueOf(s.charAt(0)))) {
-                        lore.remove(toRemove);
-                    }
-                    meta.setLore(lore);
-                    sender.getInventory().getItemInMainHand().setItemMeta(meta);
+        if (!stack.getType().isAir()) {
+            if (meta != null) {
+                if (meta.hasLore()) {
+                    lore.addAll(meta.getLore());
                 }
+                for (String s : skill) {
+                    for (byte chance = 100; chance > -1; chance--) {
+                        String toRemove = s.charAt(0) + Byte.toString(chance);
+                        if (removeSkill.contains(String.valueOf(s.charAt(0)))) {
+                            lore.remove(toRemove);
+                        }
+                        meta.setLore(lore);
+                        sender.getInventory().getItemInMainHand().setItemMeta(meta);
+                    }
+                }
+                message.msg(sender, "remove");
             }
+        } else {
+            message.msg(sender, "air");
         }
     }
 

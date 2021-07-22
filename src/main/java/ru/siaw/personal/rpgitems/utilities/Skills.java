@@ -11,14 +11,82 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import ru.siaw.personal.rpgitems.Main;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 public class Skills {
+    private final Lore lore = new Lore();
     private Location loc;
 
-    public void arsonSkill(Entity attacked) {
+    public void selection(ItemStack weapon, Player damager, Entity attacked) {
+        if (weapon.hasItemMeta() && weapon.getItemMeta().hasLore()) {
+            ArrayList<String> lores = new ArrayList<>(lore.getLores(weapon));
+            ArrayList<Byte> chances = new ArrayList<>();
+            ArrayList<String> skillList = new ArrayList<>();
+            for (String l : lores) {
+                skillList.add(lore.decodeLore(l));
+                chances.add(lore.decodeChance(l));
+            }
+            for (String s : skillList) {
+                for (byte c : chances) {
+                    switch (s) {
+                        case "arson":
+                            if (doSkill(c)) {
+                                arsonSkill(attacked);
+                            }
+                            break;
+                        case "bleeding":
+                            if (doSkill(c)) {
+                                bleedingSkill(attacked);
+                            }
+                            break;
+                        case "hit":
+                            if (doSkill(c)) {
+                                hitSkill(damager);
+                            }
+                            break;
+                        case "input":
+                            if (doSkill(c)) {
+                                inputSkill(damager, (Player) attacked);
+                            }
+                            break;
+                        case "lightning":
+                            if (doSkill(c)) {
+                                lightningSkill(attacked);
+                            }
+                            break;
+                        case "poisoning":
+                            if (doSkill(c)) {
+                                poisoningSkill((Player) attacked);
+                            }
+                            break;
+                        case "vampirism":
+                            if (doSkill(c)) {
+                                vampirismSkill(damager);
+                            }
+                            break;
+                        case "wither":
+                            if (doSkill(c)) {
+                                witherSkill((Player) attacked);
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean doSkill(byte chance) {
+        Random rnd = new Random();
+        byte randomNum = (byte) rnd.nextInt(100);
+        return randomNum <= chance;
+    }
+
+    private void arsonSkill(Entity attacked) {
         attacked.setFireTicks(100);
     }
 
-    public void bleedingSkill(Entity attacked) {
+    private void bleedingSkill(Entity attacked) {
         loc = attacked.getLocation();
         attacked.getWorld().playEffect(loc, Effect.STEP_SOUND, Material.REDSTONE_BLOCK);
         Bukkit.getScheduler().runTaskLater(Main.getInst(), () -> {
@@ -29,29 +97,29 @@ public class Skills {
         }, 80L);
     }
 
-    public void hitSkill(Player damager) {
+    private void hitSkill(Player damager) {
         damager.setLastDamage(damager.getLastDamage() * 0.20);
     }
 
-    public void lightningSkill(Entity attacked) {
+    private void lightningSkill(Entity attacked) {
         Location loc = attacked.getLocation();
         attacked.getWorld().strikeLightning(loc);
     }
 
-    public void poisoningSkill(Player attacked) {
+    private void poisoningSkill(Player attacked) {
         attacked.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 2));
     }
 
-    public void vampirismSkill(Player damager) {
+    private void vampirismSkill(Player damager) {
         double newHealth = damager.getLastDamage() / 2;
         damager.setHealth(damager.getHealth() + newHealth);
     }
 
-    public void witherSkill(Player attacked) {
+    private void witherSkill(Player attacked) {
         attacked.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 60, 1));
     }
 
-    public void inputSkill(Player damager, Player attacked) {
+    private void inputSkill(Player damager, Player attacked) {
         ItemStack[] armorContents = attacked.getInventory().getArmorContents();
         for (byte slot = 3; slot > -1; slot--) {
             if (!armorContents[slot].getType().isAir()) {

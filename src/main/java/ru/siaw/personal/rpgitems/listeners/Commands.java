@@ -1,17 +1,15 @@
 package ru.siaw.personal.rpgitems.listeners;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import ru.siaw.personal.rpgitems.utilities.FileManager;
 import ru.siaw.personal.rpgitems.utilities.Lore;
-
-import java.util.Objects;
+import ru.siaw.personal.rpgitems.utilities.Messages;
 
 public class Commands implements CommandExecutor {
-    private final Lore lore = new Lore();
+    final Lore lore = new Lore();
+    final Messages message = new Messages();
 
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("rpg")) {
@@ -23,30 +21,36 @@ public class Commands implements CommandExecutor {
                                 if (args.length == 1) {
                                     if (sender.hasPermission("rpg.list") && sender.hasPermission("rpg.admin") && sender.isOp()) {
                                         ItemStack itemInHand = ((Player) sender).getInventory().getItemInMainHand();
-                                        String loresList = lore.loresList(lore.getLores(itemInHand));
-                                        if (loresList != null) {
-                                            sender.sendMessage(loresList);
+                                        if (!itemInHand.getType().isAir()) {
+                                            String loresList = lore.loresList(lore.getLores(itemInHand));
+                                            if (loresList.length() != 0) {
+                                                sender.sendMessage(loresList);
+                                            } else {
+                                                message.msg(sender, "noSkills");
+                                            }
                                         } else {
-                                            message(sender, "noSkills");
+                                            message.msg(sender, "air");
                                         }
                                     } else {
-                                        message(sender, "permission");
+                                        message.msg(sender, "permission");
                                     }
                                 } else {
-                                    message(sender, "incorrectUse");
+                                    message.msg(sender, "incorrectUse");
                                 }
                                 return false;
                             case "add":
                                 if (args.length == 3) {
                                     if (sender.hasPermission("rpg.add") || sender.hasPermission("rpg.admin") || sender.isOp()) {
-                                        if (Byte.parseByte(args[2]) >= 1 && Byte.parseByte(args[2]) <= 100) {
+                                        if (Byte.parseByte(args[2]) > 0 && Byte.parseByte(args[2]) < 101) {
                                             lore.addLore((Player) sender, args[1], args[2]);
+                                        } else {
+                                            message.msg(sender, "incorrectUse");
                                         }
                                     } else {
-                                        message(sender, "permission");
+                                        message.msg(sender, "permission");
                                     }
                                 } else {
-                                    message(sender, "incorrectUse");
+                                    message.msg(sender, "incorrectUse");
                                 }
                                 return false;
                             case "remove":
@@ -54,47 +58,22 @@ public class Commands implements CommandExecutor {
                                     if (sender.hasPermission("rpg.remove") && sender.hasPermission("rpg.admin") && sender.isOp()) {
                                         lore.removeLore((Player) sender, args[1]);
                                     } else {
-                                        message(sender, "permission");
+                                        message.msg(sender, "permission");
                                     }
                                 } else {
-                                    message(sender, "incorrectUse");
+                                    message.msg(sender, "incorrectUse");
                                 }
                                 return false;
                         }
-                        message(sender, "incorrectUse");
+                        message.msg(sender, "incorrectUse");
                     }
                 } else {
-                    message(sender, "notPlayer");
+                    message.msg(sender, "notPlayer");
                 }
             } else {
-                message(sender, "permission");
+                message.msg(sender, "permission");
             }
         }
         return false;
-    }
-
-    private void message(CommandSender sender, String msg) {
-        switch (msg) {
-            case "permission":
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        Objects.requireNonNull(FileManager.getMsg().getString("permission"))));
-                break;
-            case "notPlayer":
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        Objects.requireNonNull(FileManager.getMsg().getString("notPlayer"))));
-                break;
-            case "incorrectUse":
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        Objects.requireNonNull(FileManager.getMsg().getString("incorrectUse"))));
-                break;
-            case "alreadyHas":
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        Objects.requireNonNull(FileManager.getMsg().getString("alreadyHas"))));
-                break;
-            case "noSkills":
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        Objects.requireNonNull(FileManager.getMsg().getString("noSkills"))));
-                break;
-        }
     }
 }
