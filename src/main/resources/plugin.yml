@@ -1,0 +1,28 @@
+name: RPGitems
+version: ${project.version}
+main: ru.siaw.personal.rpgitems.Main
+depend: [ProtocolLib]
+author: tom8hawk
+website: hhtp://siaw.ru/
+api-version: 1.13
+
+commands:
+  rpg:
+    description: Main command.
+permissions:
+  rpg.admin:
+    desription: Adds all permissions.
+    default: op
+    children:
+      rpg.add: true
+      rpg.remove: true
+      rpg.list: true
+  rpg.add:
+    desription: Add skill to tool
+    default: op
+  rpg.remove:
+    desription: Remove a skill from a tool
+    default: op
+  rpg.list:
+    desription: list of current Skills on the instrument
+    default: op
