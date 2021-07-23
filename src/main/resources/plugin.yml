@@ -1,5 +1,5 @@
 name: RPGitems
-version: ${project.version}
+version: 1.3
 main: ru.siaw.personal.rpgitems.Main
 depend: [ProtocolLib]
 author: tom8hawk

@@ -1,23 +1,24 @@
 package ru.siaw.personal.rpgitems.utilities;
 
-import org.bukkit.configuration.file.YamlConfiguration;
-import ru.siaw.personal.rpgitems.Main;
-
 import java.io.File;
+import ru.siaw.personal.rpgitems.Main;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public class FileManager {
-    private static YamlConfiguration msg;
-
+    static YamlConfiguration msg;
+    
     public static void checkFiles() {
-        if (!Main.getInst().getDataFolder().exists())
+        if (!Main.getInst().getDataFolder().exists()) {
             Main.getInst().getDataFolder().mkdir();
+        }
         File message = new File(Main.getInst().getDataFolder(), "message.yml");
-        if (!message.exists())
+        if (!message.exists()) {
             Main.getInst().saveResource("message.yml", true);
-        msg = YamlConfiguration.loadConfiguration(message);
+        }
+        FileManager.msg = YamlConfiguration.loadConfiguration(message);
     }
-
+    
     public static YamlConfiguration getMsg() {
-        return msg;
+        return FileManager.msg;
     }
 }

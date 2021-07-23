@@ -4,12 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>ru.siaw.personal.rpgitems</groupId>
-    <artifactId>RPGitems</artifactId>
-    <version>1.2</version>
+    <groupId>ru.siaw.personal</groupId>
+    <artifactId>rpgitems</artifactId>
+    <version>1.3</version>
     <packaging>jar</packaging>
 
-    <name>Rpgitems</name>
+    <name>RPGitems</name>
 
     <properties>
         <java.version>1.8</java.version>
@@ -72,7 +72,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.17-R0.1-SNAPSHOT</version>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
