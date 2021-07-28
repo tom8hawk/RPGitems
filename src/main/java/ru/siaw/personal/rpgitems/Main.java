@@ -1,38 +1,36 @@
 package ru.siaw.personal.rpgitems;
 
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketContainer;
-import org.bukkit.Bukkit;
-import org.bukkit.inventory.ItemStack;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
+import ru.siaw.personal.rpgitems.listeners.Commands;
 import ru.siaw.personal.rpgitems.listeners.Events;
 import ru.siaw.personal.rpgitems.listeners.TabComplete;
-import ru.siaw.personal.rpgitems.listeners.Commands;
-import java.util.Objects;
 import ru.siaw.personal.rpgitems.utilities.FileManager;
 import ru.siaw.personal.rpgitems.utilities.Lore;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
     public static Main inst;
-    final Lore lore;
-    
+    final Lore lore = new Lore();
+
     public Main() {
-        lore = new Lore();
         inst = this;
     }
-    
+
     public static Main getInst() {
         return inst;
     }
-    
+
     public void onEnable() {
         FileManager.checkFiles();
-        Objects.requireNonNull(getCommand("rpg")).setExecutor(new Commands());
-        Objects.requireNonNull(getCommand("rpg")).setTabCompleter(new TabComplete());
+        getCommand("rpg").setExecutor(new Commands());
+        getCommand("rpg").setTabCompleter(new TabComplete());
         Bukkit.getPluginManager().registerEvents(new Events(), this);
         ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         protocolManager.addPacketListener(new PacketAdapter(this, PacketType.Play.Server.SET_SLOT) {
@@ -48,15 +46,17 @@ public class Main extends JavaPlugin {
             public void onPacketSending(PacketEvent e) {
                 PacketContainer packet = e.getPacket();
                 ItemStack[] elements = packet.getItemArrayModifier().read(0);
-                for (byte slot = (byte)elements.length; slot >= 0; --slot) {
+                byte slot = (byte) elements.length;
+                while (slot >= 0) {
                     if (!elements[slot].getType().isAir()) {
                         lore.removePacketLore(elements[slot], packet);
                     }
+                    slot--;
                 }
             }
         });
     }
-    
+
     public void onDisable() {
     }
 }

@@ -1,7 +1,7 @@
 name: RPGitems
-version: 0.4
+version: ${project.version}
 main: ru.siaw.personal.rpgitems.Main
-depend: [ProtocolLib]
+softdepend: [ProtocolLib]
 author: tom8hawk
 website: hhtp://siaw.ru/
 api-version: 1.13

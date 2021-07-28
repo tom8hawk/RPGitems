@@ -1,152 +1,207 @@
 package ru.siaw.personal.rpgitems.utilities;
 
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import ru.siaw.personal.rpgitems.Main;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.Effect;
-import java.util.Random;
-import java.util.ArrayList;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.Location;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import ru.siaw.personal.rpgitems.Main;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Skills {
-    final Lore lore;
-    Location loc;
-    
-    public Skills() {
-        lore = new Lore();
-    }
-    
+    final Lore lore = new Lore();
+    Player damagerPlayer;
+
     public void selection(ItemStack weapon, Player damager, Entity attacked) {
-        if (weapon.hasItemMeta()) {
-            ArrayList<String> lores = lore.getLores(weapon);
-            if (lores != null) {
-                ArrayList<Byte> chances = new ArrayList<>();
-                ArrayList<String> skillList = new ArrayList<>();
-                for (String l : lores) {
-                    skillList.add(lore.decodeLore(l));
-                    chances.add(lore.decodeChance(l));
-                }
-                for (String s : skillList) {
-                    for (byte c : chances) {
-                        switch (s) {
-                            case "arson":
-                                if (doSkill(c)) {
-                                    arsonSkill(attacked);
-                                    continue;
-                                }
-                                continue;
-                            case "bleeding":
-                                if (doSkill(c)) {
-                                    bleedingSkill(attacked);
-                                    continue;
-                                }
-                                continue;
-                            case "hit":
-                                if (doSkill(c)) {
-                                    hitSkill(damager);
-                                    continue;
-                                }
-                                continue;
-                            case "input":
-                                if (doSkill(c)) {
-                                    inputSkill(damager, (Player)attacked);
-                                    continue;
-                                }
-                                continue;
-                            case "lightning":
-                                if (doSkill(c)) {
-                                    lightningSkill(attacked);
-                                    continue;
-                                }
-                                continue;
-                            case "poisoning":
-                                if (doSkill(c)) {
-                                    poisoningSkill((Player)attacked);
-                                    continue;
-                                }
-                                continue;
-                            case "vampirism":
-                                if (doSkill(c)) {
-                                    vampirismSkill(damager);
-                                    continue;
-                                }
-                                continue;
-                            case "wither":
-                                if (doSkill(c)) {
-                                    witherSkill((Player)attacked);
-                                    continue;
-                                }
-                                continue;
-                            case "shield":
-                                if (doSkill(c)) {
-                                    shieldSkill(damager, (Player)attacked);
-                                }
-                        }
-                    }
+        ArrayList<String> skillList = new ArrayList<>(decodeSkills(weapon));
+        ArrayList<Byte> chancesList = new ArrayList<>(decodeChances(weapon));
+        damagerPlayer = damager;
+        Player playerAttacked = null;
+
+        if (attacked instanceof Player) {
+            playerAttacked = (Player) attacked;
+        }
+
+        if (skillList.contains("poisoning")) {
+            if (doSkill(chancesList.get(skillList.indexOf("poisoning")))) {
+                if (playerAttacked != null) {
+                    poisoning(playerAttacked);
                 }
             }
         }
+        if (skillList.contains("wither")) {
+            if (doSkill(chancesList.get(skillList.indexOf("wither")))) {
+                if (playerAttacked != null) {
+                    wither(playerAttacked);
+                }
+            }
+        }
+        if (skillList.contains("bleeding")) {
+            if (doSkill(chancesList.get(skillList.indexOf("bleeding")))) {
+                bleeding(attacked);
+            }
+        }
+        if (skillList.contains("shield")) {
+            if (doSkill(chancesList.get(skillList.indexOf("shield")))) {
+                if (playerAttacked != null) {
+                    shield(playerAttacked);
+                }
+            }
+        }
+        if (skillList.contains("vampirism")) {
+            if (doSkill(chancesList.get(skillList.indexOf("vampirism")))) {
+                if (playerAttacked != null) {
+                    vampirism(playerAttacked);
+                }
+            }
+        }
+        if (skillList.contains("lightning")) {
+            if (doSkill(chancesList.get(skillList.indexOf("lightning")))) {
+                lightning(attacked);
+            }
+        }
+        if (skillList.contains("arson")) {
+            if (doSkill(chancesList.get(skillList.indexOf("arson")))) {
+                arson(attacked);
+            }
+        }
     }
-    
-    public boolean doSkill(byte chance) {
+
+    public double selectionForDamage(Entity attacked) {
+        double returnDamage = -1;
+
+        if (attacked instanceof Player) {
+            Player playerAttacked = (Player) attacked;
+            ItemStack weapon = damagerPlayer.getInventory().getItemInMainHand();
+            ArrayList<String> skillList = new ArrayList<>(decodeSkills(weapon));
+            ArrayList<Byte> chancesList = new ArrayList<>(decodeChances(weapon));
+
+            if (skillList.contains("hit")) {
+                if (doSkill(chancesList.get(skillList.indexOf("hit")))) {
+                    returnDamage = hit(playerAttacked);
+                }
+            }
+            if (skillList.contains("input")) {
+                if (doSkill(chancesList.get(skillList.indexOf("input")))) {
+                    returnDamage = input(playerAttacked);
+                }
+            }
+        }
+        return returnDamage;
+    }
+
+    private boolean doSkill(byte chance) {
         Random rnd = new Random();
-        byte randomNum = (byte)rnd.nextInt(100);
+        byte randomNum = (byte) rnd.nextInt(100);
         return randomNum <= chance;
     }
-    
-    public void arsonSkill(Entity attacked) {
+
+    private ArrayList<String> decodeSkills(ItemStack weapon) {
+        ArrayList<String> weaponSkills = new ArrayList<>(lore.getLores(weapon));
+        ArrayList<String> skillList = new ArrayList<>();
+        for (String ws : weaponSkills) {
+            skillList.add(lore.decodeLore(ws));
+        }
+        return skillList;
+    }
+
+    private ArrayList<Byte> decodeChances(ItemStack weapon) {
+        ArrayList<String> weaponChances = new ArrayList<>(lore.getLores(weapon));
+        ArrayList<Byte> chancesList = new ArrayList<>();
+        for (String wc : weaponChances) {
+            chancesList.add(lore.decodeChance(wc));
+        }
+        return chancesList;
+    }
+
+    private void arson(Entity attacked) {
         attacked.setFireTicks(100);
     }
-    
-    public void bleedingSkill(Entity attacked) {
-        loc = attacked.getLocation();
-        attacked.getWorld().playEffect(loc, Effect.STEP_SOUND, (Object)Material.REDSTONE_BLOCK);
-        Bukkit.getScheduler().runTaskLater(Main.getInst(), () -> {
-            if (!attacked.isDead()) {
-                loc = attacked.getLocation();
-                attacked.getWorld().playEffect(loc, Effect.STEP_SOUND, (Object)Material.REDSTONE_BLOCK);
-            }
-        }, 80L);
+
+    private void bleeding(Entity attacked) {
+        if (attacked instanceof Player) {
+            playBlood(attacked);
+            Player playerAttacked = (Player) attacked;
+            Bukkit.getScheduler().runTaskAsynchronously(Main.getInst(), () -> {
+                for (byte col = 0; col < 3; col++) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    removeHealth(playerAttacked);
+                    playBlood(attacked);
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                playBlood(attacked);
+            });
+        } else {
+            playBlood(attacked);
+            Bukkit.getScheduler().runTaskLater(Main.getInst(), () -> {
+                if (!attacked.isDead()) {
+                    playBlood(attacked);
+                }
+            }, 80L);
+        }
     }
-    
-    public void hitSkill(Player damager) {
-        damager.setLastDamage(damager.getLastDamage() * 0.2);
+
+    private void removeHealth(Player p) {
+        String removePrecision = String.format("%.2f", p.getHealth());
+        double newHealth = Double.parseDouble(removePrecision) - 1.0;
+        p.setHealth(newHealth);
     }
-    
-    public void lightningSkill(Entity attacked) {
+
+    private void playBlood(Entity attacked) {
+        attacked.getWorld().playEffect(attacked.getLocation(), Effect.STEP_SOUND, Material.REDSTONE_BLOCK);
+    }
+
+    private double hit(Player attacked) {
+        double oldDamage = attacked.getLastDamage();
+        return oldDamage + (oldDamage * 20.0 / 100);
+    }
+
+    private void lightning(Entity attacked) {
         Location loc = attacked.getLocation();
         attacked.getWorld().strikeLightning(loc);
     }
-    
-    public void poisoningSkill(Player attacked) {
+
+    private void poisoning(Player attacked) {
         attacked.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 2));
     }
-    
-    public void vampirismSkill(Player damager) {
-        double newHealth = damager.getLastDamage() / 2.0;
-        damager.setHealth(damager.getHealth() + newHealth);
+
+    private void vampirism(Player attacked) {
+        String newHealth = String.format("%.2f", attacked.getLastDamage() / 2.0);
+        attacked.setHealth(Double.parseDouble(attacked.getHealth() + newHealth));
     }
-    
-    public void witherSkill(Player attacked) {
+
+    private void wither(Player attacked) {
         attacked.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 60, 1));
     }
-    
-    public void inputSkill(Player damager, Player attacked) {
+
+    private double input(Player attacked) {
         ItemStack[] armorContents = attacked.getInventory().getArmorContents();
-        for (byte slot = 3; slot > -1; --slot) {
-            if (!armorContents[slot].getType().isAir() && (armorContents[slot].getType() == Material.DIAMOND_BOOTS || armorContents[slot].getType() == Material.DIAMOND_LEGGINGS || armorContents[slot].getType() == Material.DIAMOND_CHESTPLATE || armorContents[slot].getType() == Material.DIAMOND_HELMET || armorContents[slot].getType() == Material.NETHERITE_BOOTS || armorContents[slot].getType() == Material.NETHERITE_LEGGINGS || armorContents[slot].getType() == Material.NETHERITE_CHESTPLATE || armorContents[slot].getType() == Material.NETHERITE_HELMET)) {
-                damager.setLastDamage(0.0);
-            }
+        double returnDamage = -1;
+        if ((armorContents[0] != null && armorContents[1] != null && armorContents[2] != null && armorContents[3] != null) && (armorContents[0].getType() == Material.DIAMOND_BOOTS || armorContents[0].getType() == Material.NETHERITE_BOOTS) &&
+                (armorContents[1].getType() == Material.DIAMOND_LEGGINGS || armorContents[1].getType() == Material.NETHERITE_LEGGINGS) && (armorContents[2].getType() == Material.DIAMOND_CHESTPLATE || armorContents[2].getType() == Material.NETHERITE_CHESTPLATE) &&
+                (armorContents[3].getType() == Material.DIAMOND_HELMET || armorContents[3].getType() == Material.NETHERITE_HELMET)) {
+            returnDamage = 0.0;
         }
+        return returnDamage;
     }
-    
-    public void shieldSkill(Player damager, Player attacked) {
-        if (damager.getLastDamage() > 0.0) {
+
+    private void shield(Player attacked) {
+        if (attacked.getLastDamage() > 0.0) {
             Material itemInMainHand = attacked.getInventory().getItemInMainHand().getType();
             Material itemInOffHand = attacked.getInventory().getItemInOffHand().getType();
             ItemStack air = new ItemStack(Material.AIR, 1);

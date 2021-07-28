@@ -1,29 +1,22 @@
 package ru.siaw.personal.rpgitems.listeners;
 
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.entity.Player;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import ru.siaw.personal.rpgitems.utilities.Messages;
-import ru.siaw.personal.rpgitems.utilities.Lore;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import ru.siaw.personal.rpgitems.utilities.Lore;
+import ru.siaw.personal.rpgitems.utilities.Messages;
 
 public class Commands implements CommandExecutor {
-    final Lore lore;
-    final Messages message;
+    final Lore lore = new Lore();
+    final Messages message = new Messages();
 
-    public Commands() {
-        lore = new Lore();
-        message = new Messages();
-    }
-    
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("rpg")) {
             if (sender.hasPermission("rpg.use") || sender.hasPermission("rpg.admin") || sender.isOp()) {
                 if (sender instanceof Player) {
                     if (args.length != 0) {
-                        String lowerCase = args[0].toLowerCase();
-                        switch (lowerCase) {
+                        switch (args[0].toLowerCase()) {
                             case "list":
                                 if (args.length == 1) {
                                     if (sender.hasPermission("rpg.list") && sender.hasPermission("rpg.admin") && sender.isOp()) {
@@ -71,10 +64,8 @@ public class Commands implements CommandExecutor {
                                     message.msg(sender, "incorrectUse");
                                 }
                                 return false;
-                            default:
-                                message.msg(sender, "incorrectUse");
-                                break;
                         }
+                        message.msg(sender, "incorrectUse");
                     }
                 } else {
                     message.msg(sender, "notPlayer");

@@ -1,27 +1,23 @@
 package ru.siaw.personal.rpgitems.utilities;
 
-import org.bukkit.ChatColor;
 import com.comphenix.protocol.events.PacketContainer;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.ItemStack;
-import java.util.ArrayList;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 public class Lore {
-    final String[] skill;
-    final Messages message;
-    
-    public Lore() {
-        skill = new String[] { "arson", "bleeding", "hit", "lightning", "poisoning", "vampirism", "wither", "input", "shield" };
-        message = new Messages();
-    }
-    
+    private final String[] skill = {"arson", "bleeding", "hit", "lightning", "poisoning", "vampirism", "wither", "input", "shield"};
+    private final Messages message = new Messages();
+
     public Collection<? extends String> getSkills() {
         return Arrays.asList(skill);
     }
-    
+
     public void addLore(Player sender, String addSkill, String chance) {
         ItemStack stack = sender.getInventory().getItemInMainHand();
         ItemMeta meta = stack.getItemMeta();
@@ -44,19 +40,19 @@ public class Lore {
             message.msg(sender, "air");
         }
     }
-    
-    public ArrayList<String> getLores( ItemStack stack) {
+
+    public ArrayList<String> getLores(ItemStack stack) {
         ArrayList<String> foundLores = new ArrayList<>();
         if (!stack.getType().isAir()) {
             ItemMeta meta = stack.getItemMeta();
-            if (meta != null) {
-                ArrayList<String> lore = (ArrayList<String>)meta.getLore();
-                if (lore != null) {
-                    for (String l : lore) {
-                        for (String s : skill) {
-                            for (byte chance = 100; chance > -1; --chance) {
-                                String toFind = s.charAt(0) + Byte.toString(chance);
-                                if (!foundLores.contains(l) && l.contains(toFind)) {
+            if (meta.hasLore()) {
+                ArrayList<String> lore = new ArrayList<>(meta.getLore());
+                for (String l : lore) {
+                    for (String s : skill) {
+                        for (byte chance = 100; chance > -1; chance--) {
+                            String toFind = s.charAt(0) + Byte.toString(chance);
+                            if (!foundLores.contains(l)) {
+                                if (l.contains(toFind)) {
                                     foundLores.add(toFind);
                                 }
                             }
@@ -67,7 +63,7 @@ public class Lore {
         }
         return foundLores;
     }
-    
+
     public void removeLore(Player sender, String removeSkill) {
         ItemStack stack = sender.getInventory().getItemInMainHand();
         ItemMeta meta = stack.getItemMeta();
@@ -78,7 +74,7 @@ public class Lore {
                     lore.addAll(meta.getLore());
                 }
                 for (String s : skill) {
-                    for (byte chance = 100; chance > -1; --chance) {
+                    for (byte chance = 100; chance > -1; chance--) {
                         String toRemove = s.charAt(0) + Byte.toString(chance);
                         if (removeSkill.contains(String.valueOf(s.charAt(0)))) {
                             lore.remove(toRemove);
@@ -93,24 +89,26 @@ public class Lore {
             message.msg(sender, "air");
         }
     }
-    
+
     public void removePacketLore(ItemStack stack, PacketContainer packet) {
-        if (stack.getItemMeta() != null) {
-            ItemMeta meta = stack.getItemMeta();
-            ArrayList<String> lore = (ArrayList<String>)meta.getLore();
-            if (lore != null) {
-                for (String s : skill) {
-                    for (byte chance = 100; chance > -1; --chance) {
-                        lore.remove(s.charAt(0) + Byte.toString(chance));
-                        meta.setLore(lore);
-                        stack.setItemMeta(meta);
-                        packet.getItemModifier().write(0, stack);
-                    }
-                }
+        if (stack.getItemMeta() == null) {
+            return;
+        }
+        ItemMeta meta = stack.getItemMeta();
+        if (!meta.hasLore()) {
+            return;
+        }
+        ArrayList<String> lore = new ArrayList<>(meta.getLore());
+        for (String s : skill) {
+            for (byte chance = 100; chance > -1; chance--) {
+                lore.remove(s.charAt(0) + Byte.toString(chance));
+                meta.setLore(lore);
+                stack.setItemMeta(meta);
+                packet.getItemModifier().write(0, stack);
             }
         }
     }
-    
+
     public String decodeLore(String lore) {
         String returnLore = null;
         lore = lore.replaceAll("\\d", "");
@@ -122,11 +120,11 @@ public class Lore {
         }
         return returnLore;
     }
-    
+
     public Byte decodeChance(String lore) {
         return Byte.valueOf(lore.replaceAll("\\D", ""));
     }
-    
+
     public String loresList(ArrayList<String> lores) {
         ArrayList<String> decodedLores = new ArrayList<>();
         ArrayList<Byte> decodedChances = new ArrayList<>();
@@ -137,15 +135,15 @@ public class Lore {
                 decodedChances.add(decodeChance(l));
             }
         }
-        byte doMsg = (byte)lores.size();
+        byte doMsg = (byte) lores.size();
         while (doMsg > -1) {
             String dl;
+            String dc;
             try {
                 dl = decodedLores.get(doMsg);
             } catch (Exception e) {
                 dl = null;
             }
-            String dc;
             try {
                 dc = String.valueOf(decodedChances.get(doMsg));
             } catch (Exception e) {
@@ -163,3 +161,4 @@ public class Lore {
         return msg.toString();
     }
 }
+
