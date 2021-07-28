@@ -16,7 +16,8 @@ public class Commands implements CommandExecutor {
             if (sender.hasPermission("rpg.use") || sender.hasPermission("rpg.admin") || sender.isOp()) {
                 if (sender instanceof Player) {
                     if (args.length != 0) {
-                        switch (args[0].toLowerCase()) {
+                        String lowerCase = args[0].toLowerCase();
+                        switch (lowerCase) {
                             case "list":
                                 if (args.length == 1) {
                                     if (sender.hasPermission("rpg.list") && sender.hasPermission("rpg.admin") && sender.isOp()) {
@@ -64,8 +65,10 @@ public class Commands implements CommandExecutor {
                                     message.msg(sender, "incorrectUse");
                                 }
                                 return false;
+                            default:
+                                message.msg(sender, "incorrectUse");
+                                break;
                         }
-                        message.msg(sender, "incorrectUse");
                     }
                 } else {
                     message.msg(sender, "notPlayer");

@@ -91,10 +91,10 @@ public class Lore {
     }
 
     public void removePacketLore(ItemStack stack, PacketContainer packet) {
-        if (stack.getItemMeta() == null) {
+        ItemMeta meta = stack.getItemMeta();
+        if (meta == null) {
             return;
         }
-        ItemMeta meta = stack.getItemMeta();
         if (!meta.hasLore()) {
             return;
         }

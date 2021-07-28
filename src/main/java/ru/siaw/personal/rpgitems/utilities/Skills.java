@@ -125,10 +125,10 @@ public class Skills {
     }
 
     private void bleeding(Entity attacked) {
-        if (attacked instanceof Player) {
+        Bukkit.getScheduler().runTaskAsynchronously(Main.getInst(), () -> {
             playBlood(attacked);
-            Player playerAttacked = (Player) attacked;
-            Bukkit.getScheduler().runTaskAsynchronously(Main.getInst(), () -> {
+            if (attacked instanceof Player) {
+                Player playerAttacked = (Player) attacked;
                 for (byte col = 0; col < 3; col++) {
                     try {
                         Thread.sleep(1000);
@@ -136,7 +136,7 @@ public class Skills {
                         e.printStackTrace();
                     }
 
-                    removeHealth(playerAttacked);
+                    playerAttacked.setHealth(playerAttacked.getHealth() - 1.0);;
                     playBlood(attacked);
                 }
                 try {
@@ -145,25 +145,20 @@ public class Skills {
                     e.printStackTrace();
                 }
                 playBlood(attacked);
-            });
-        } else {
+            }
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             playBlood(attacked);
-            Bukkit.getScheduler().runTaskLater(Main.getInst(), () -> {
-                if (!attacked.isDead()) {
-                    playBlood(attacked);
-                }
-            }, 80L);
-        }
-    }
-
-    private void removeHealth(Player p) {
-        String removePrecision = String.format("%.2f", p.getHealth());
-        double newHealth = Double.parseDouble(removePrecision) - 1.0;
-        p.setHealth(newHealth);
+        });
     }
 
     private void playBlood(Entity attacked) {
-        attacked.getWorld().playEffect(attacked.getLocation(), Effect.STEP_SOUND, Material.REDSTONE_BLOCK);
+        if (!attacked.isDead()) {
+            attacked.getWorld().playEffect(attacked.getLocation(), Effect.STEP_SOUND, Material.REDSTONE_BLOCK);
+        }
     }
 
     private double hit(Player attacked) {

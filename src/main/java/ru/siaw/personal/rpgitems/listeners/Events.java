@@ -1,6 +1,5 @@
 package ru.siaw.personal.rpgitems.listeners;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
